@@ -19,7 +19,7 @@ adicionar_compromisso(Data, Hora, _) :-
     !,
     write('Já existe um compromisso no mesmo horário.'), nl, fail.
 
-% adiciona um compromisso dinamicamente, utilizando a função assertz
+% Adiciona um compromisso dinamicamente, utilizando a função assertz
 % ou seja, com ela é possível adicionar um compromisso durante a execução do programa
 adicionar_compromisso(Data, Hora, Descricao) :-
     assertz(compromisso(Data, Hora, Descricao)),
@@ -35,8 +35,14 @@ listar_compromissos(Data) :-
     compromisso(Data, Hora, Descricao),
     format('~w ~w: ~w~n', [Data, Hora, Descricao]),
     fail.
+listar_compromissos(_) :- writeln('').
 
-listar_compromissos :- true.
+% Lista todos os compromissos
+listar_todos_compromissos :-
+    compromisso(Data, Hora, Descricao),
+    format('~w ~w: ~w~n', [Data, Hora, Descricao]),
+    fail.
+listar_todos_compromissos :- writeln('').
 
 % Salva os dados em um arquivo
 salvar_no_arquivo(Filename) :-
@@ -55,7 +61,6 @@ carregar_do_arquivo(Filename) :-
         fail
     ).
 
-
 % Basicamente é um menu em loop 
 % O repeat ativa um loop infinito, semelhante a um while(true)
 % a condição de parada vai ser quando o usuário digitar '0' que se refere a opção de saída do menu
@@ -68,7 +73,7 @@ menu_loop :-
     Escolha = 0, 
     !.
 
-% menu de opções
+% Menu de opções
 exibe_menu :-
     writeln('Menu:'),
     writeln('1. Listar compromissos a partir de uma data'),
@@ -76,7 +81,7 @@ exibe_menu :-
     writeln('3. Remover compromisso'),
     writeln('4. Lista todos os compromissos'),
     writeln('0. Sair'),
-    write('Escolha uma opcao:').
+    write('Escolha uma opcao: ').
 
 % Funciona como um switch, basicamente é o tratamento das opções escolhidas pelo usuário
 op_selecionada(1) :-
@@ -100,23 +105,19 @@ op_selecionada(3) :-
     write('Digite a data [dd,mm,aaaa]: '),
     read([DataDia, DataMes, DataAno]),
     write('Digite a hora [hh,mm]: '),
-    read([Hora,Minuto]),
+    read([Hora, Minuto]),
     remover_compromisso(data(DataDia, DataMes, DataAno), hora(Hora, Minuto)).
 
 op_selecionada(4) :-
-    writeln('Lista de compromissos:'),
-    listar_compromissos(_).
+    writeln('Lista de todos os compromissos:'),
+    listar_todos_compromissos.
 
 % Essa opção finaliza o loop
 % salva os compromissos que estão em memória no arquivo
-% Exibe mensagem de saida
+% Exibe mensagem de saída
 op_selecionada(0) :-
     salvar_no_arquivo('compromissos.pl'),
     writeln('Saindo do menu.').
-
-op_selecionada(_) :-
-    writeln('Opcao invalida. Por favor, escolha uma opcao valida.').
-
 
 % Essa função faz com que ao inicializar o arquivo agenda.pl já seja executada a função 'main'
 :- initialization(main).
