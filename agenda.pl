@@ -67,7 +67,13 @@ buscar_compromisso_por_nome(Descricao) :-
     format('Compromisso encontrado: ~w ~w: ~w~n', [Data, Hora, Descricao]),
     !.
 buscar_compromisso_por_nome(_) :-
-    writeln('Nenhum compromisso encontrado com essa descrição.').
+    writeln('Nenhum compromisso encontrado com essa descricao.').
+
+% Atualizar descrição pela data e horario.
+atualizar_compromisso(Data, Hora, NovaDescricao) :-
+    retract(compromisso(Data, Hora, _)),
+    assertz(compromisso(Data, Hora, NovaDescricao)),
+    write('Compromisso atualizado com sucesso.'), nl.
 
 % Basicamente é um menu em loop 
 % O repeat ativa um loop infinito, semelhante a um while(true)
@@ -89,6 +95,7 @@ exibe_menu :-
     writeln('3. Remover compromisso'),
     writeln('4. Lista todos os compromissos'),
     writeln('5. Buscar compromisso pelo nome'),
+    writeln('6. Atualizar do compromisso '),
     writeln('0. Sair'),
     write('Escolha uma opcao: ').
 
@@ -104,12 +111,21 @@ op_selecionada(2) :-
     writeln('Adicionar compromisso:'),
     write('Digite a data [dd,mm,aaaa]: '),
     read([DataDia, DataMes, DataAno]),
-    write('Digite a hora [hh,mm]: '),
-    read([Hora, Minuto]),
-    write('Digite a descricao: '),
-    read(Descricao),
-    adicionar_compromisso(data(DataDia, DataMes, DataAno), hora(Hora, Minuto), Descricao),
-    salvar_no_arquivo('compromissos.pl').
+    (   DataDia > 0, DataDia =< 31, 
+        DataMes > 0, DataMes =< 12  
+    ->  write('Digite a hora [hh,mm]: '),
+        read([Hora, Minuto]),
+        (   Hora >= 0, Hora < 24, 
+            Minuto >= 0, Minuto < 60 
+        ->  write('Digite a descricao: '),
+            read(Descricao),
+            adicionar_compromisso(data(DataDia, DataMes, DataAno), hora(Hora, Minuto), Descricao),
+            salvar_no_arquivo('compromissos.pl')
+        ;   writeln('Hora invalida, por favor tente novamente.')
+        )
+    ;   writeln('Data invalida, por favor tente novamente.')
+    ).
+
     
 
 op_selecionada(3) :-
@@ -118,7 +134,11 @@ op_selecionada(3) :-
     read([DataDia, DataMes, DataAno]),
     write('Digite a hora [hh,mm]: '),
     read([Hora, Minuto]),
-    remover_compromisso(data(DataDia, DataMes, DataAno), hora(Hora, Minuto)).
+    (   remover_compromisso(data(DataDia, DataMes, DataAno), hora(Hora, Minuto))
+    ->  salvar_no_arquivo('compromissos.pl')
+    ;   writeln('Compromisso nao encontrado!')
+    ).
+
 
 op_selecionada(4) :-
     writeln('Lista de todos os compromissos:'),
@@ -129,6 +149,20 @@ op_selecionada(5) :-
     write('Digite o nome do compromisso: '),
     read(Descricao),
     buscar_compromisso_por_nome(Descricao).
+
+op_selecionada(6) :-
+    writeln('Atualizar compromisso:'),
+    write('Digite a data [dd,mm,aaaa]: '),
+    read([DataDia, DataMes, DataAno]),
+    write('Digite a hora [hh,mm]: '),
+    read([Hora, Minuto]),
+    (   compromisso(data(DataDia, DataMes, DataAno), hora(Hora, Minuto), _)
+    ->  write('Digite a nova descricao: '),
+        read(NovaDescricao),
+        atualizar_compromisso(data(DataDia, DataMes, DataAno), hora(Hora, Minuto), NovaDescricao),
+        salvar_no_arquivo('compromissos.pl')
+    ;   writeln('Compromisso nao encontrado!')
+    ).
 
 % Essa opção finaliza o loop
 % salva os compromissos que estão em memória no arquivo
