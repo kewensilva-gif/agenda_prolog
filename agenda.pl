@@ -145,7 +145,7 @@ op_selecionada(4) :-
     listar_todos_compromissos.
 
 op_selecionada(5) :-
-    writeln('Buscar compromisso:'),
+    writeln('Buscar compromisso:'), 
     write('Digite o nome do compromisso: '),
     read(Descricao),
     buscar_compromisso_por_nome(Descricao).
