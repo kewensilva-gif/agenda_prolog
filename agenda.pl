@@ -44,15 +44,15 @@ listar_todos_compromissos :-
     fail.
 listar_todos_compromissos :- writeln('').
 
-% Salva os dados em um arquivo
+% Salva os dados em um arquivo com codificação UTF-8
 salvar_no_arquivo(Filename) :-
-    tell(Filename),
+    open(Filename, write, Stream, [encoding(utf8)]),  
     listing(compromisso/3),
-    told.
+    close(Stream).
 
 % Carrega os dados de um arquivo
 carregar_do_arquivo(Filename) :-
-    open(Filename, read, Stream),
+    open(Filename, read, Stream, [encoding(utf8)]),
     repeat,
     read(Stream, Term),
     (   Term == end_of_file
@@ -60,6 +60,14 @@ carregar_do_arquivo(Filename) :-
     ;   assertz(Term),
         fail
     ).
+
+% Busca um compromisso pela descrição
+buscar_compromisso_por_nome(Descricao) :-
+    compromisso(Data, Hora, Descricao),
+    format('Compromisso encontrado: ~w ~w: ~w~n', [Data, Hora, Descricao]),
+    !.
+buscar_compromisso_por_nome(_) :-
+    writeln('Nenhum compromisso encontrado com essa descricao.').
 
 % Basicamente é um menu em loop 
 % O repeat ativa um loop infinito, semelhante a um while(true)
@@ -80,6 +88,7 @@ exibe_menu :-
     writeln('2. Adicionar compromisso'),
     writeln('3. Remover compromisso'),
     writeln('4. Lista todos os compromissos'),
+    writeln('5. Buscar compromisso pelo nome'),
     writeln('0. Sair'),
     write('Escolha uma opcao: ').
 
@@ -111,6 +120,12 @@ op_selecionada(3) :-
 op_selecionada(4) :-
     writeln('Lista de todos os compromissos:'),
     listar_todos_compromissos.
+
+op_selecionada(5) :-
+    writeln('Buscar compromisso:'),
+    write('Digite o nome do compromisso: '),
+    read(Descricao),
+    buscar_compromisso_por_nome(Descricao).
 
 % Essa opção finaliza o loop
 % salva os compromissos que estão em memória no arquivo
