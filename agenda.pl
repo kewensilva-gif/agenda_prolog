@@ -44,15 +44,15 @@ listar_todos_compromissos :-
     fail.
 listar_todos_compromissos :- writeln('').
 
-% Salva os dados em um arquivo com codificação UTF-8
+% Salva os dados em um arquivo
 salvar_no_arquivo(Filename) :-
-    open(Filename, write, Stream, [encoding(utf8)]),  
+    tell(Filename),
     listing(compromisso/3),
-    close(Stream).
+    told.
 
 % Carrega os dados de um arquivo
 carregar_do_arquivo(Filename) :-
-    open(Filename, read, Stream, [encoding(utf8)]),
+    open(Filename, read, Stream),
     repeat,
     read(Stream, Term),
     (   Term == end_of_file
@@ -67,7 +67,7 @@ buscar_compromisso_por_nome(Descricao) :-
     format('Compromisso encontrado: ~w ~w: ~w~n', [Data, Hora, Descricao]),
     !.
 buscar_compromisso_por_nome(_) :-
-    writeln('Nenhum compromisso encontrado com essa descricao.').
+    writeln('Nenhum compromisso encontrado com essa descrição.').
 
 % Basicamente é um menu em loop 
 % O repeat ativa um loop infinito, semelhante a um while(true)
@@ -98,6 +98,7 @@ op_selecionada(1) :-
     write('Digite a data [dd,mm,aaaa]: '),
     read([DataDia, DataMes, DataAno]),
     listar_compromissos(data(DataDia, DataMes, DataAno)).
+    
 
 op_selecionada(2) :-
     writeln('Adicionar compromisso:'),
@@ -107,7 +108,9 @@ op_selecionada(2) :-
     read([Hora, Minuto]),
     write('Digite a descricao: '),
     read(Descricao),
-    adicionar_compromisso(data(DataDia, DataMes, DataAno), hora(Hora, Minuto), Descricao).
+    adicionar_compromisso(data(DataDia, DataMes, DataAno), hora(Hora, Minuto), Descricao),
+    salvar_no_arquivo('compromissos.pl').
+    
 
 op_selecionada(3) :-
     writeln('Remover compromisso:'),
@@ -140,4 +143,4 @@ op_selecionada(0) :-
 % A função main executa o carregamento dos compromissos e start o menu_loop
 main :-
     carregar_do_arquivo('compromissos.pl'),
-    menu_loop.
+    menu_loop. 
